@@ -29,7 +29,7 @@ DEFAULT_TARGETS ?= cpp_priv priv/cpp/soloud
 CXXFLAGS = -std=c++11 $(CC_PINC) $(CC_PLIB) $(CC_LIBS)
 
 priv/cpp/soloud: cpp_priv $(OBJ)
-	$(CXX) -std=c++11 -D MAX_AUDIO_SOURCES=$(MAX_AUDIO_SOURCES) $(SRC) -o priv/cpp/soloud $(CC_PINC) $(CC_PLIB) $(CC_LIBS)
+	$(CXX) -std=c++11 -D MAX_WAVSTREAMS=$(MAX_WAVSTREAMS) $(SRC) -o priv/cpp/soloud $(CC_PINC) $(CC_PLIB) $(CC_LIBS)
 
 cpp_priv:
 	mkdir -p priv/cpp

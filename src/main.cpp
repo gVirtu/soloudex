@@ -10,8 +10,8 @@
 #define MAX_READ 1023
 #define MAX_BINARY_SIZE 256
 
-#ifndef MAX_AUDIO_SOURCES
-  #define MAX_AUDIO_SOURCES 256
+#ifndef MAX_WAVSTREAMS
+  #define MAX_WAVSTREAMS 256
 #endif
 
 #define OP_CLOSE          -1
@@ -32,7 +32,7 @@ char buffer[MAX_READ + 1];
 
 int main() {
   SoLoud::Soloud soloud;
-  SoLoud::WavStream soloud_wavstreams[MAX_AUDIO_SOURCES];
+  SoLoud::WavStream soloud_wavstreams[MAX_WAVSTREAMS];
 
   soloud.init();
 
@@ -56,7 +56,7 @@ int main() {
         ei_decode_nt_binary(buffer, &index, &file_path, &path_length);
         ei_decode_ulong(buffer, &index, &sound_slot);
 
-        sound_slot %= MAX_AUDIO_SOURCES;
+        sound_slot %= MAX_WAVSTREAMS;
 
         SoLoud::WavStream* stream = soloud_wavstreams + sound_slot;
 
@@ -93,7 +93,7 @@ int main() {
         ei_decode_long(buffer, &index, &sound_type);
         ei_decode_long(buffer, &index, &sound_index);
 
-        int handle = -1;
+        unsigned int handle = -1;
 
         switch(sound_type) {
           case TYPE_WAVSTREAM: {
@@ -119,9 +119,9 @@ int main() {
         break;
       }
       case OP_STOP: {
-        long sound_handle;
+        unsigned long sound_handle;
         ei_decode_version(buffer, &index, &_version);
-        ei_decode_long(buffer, &index, &sound_handle);
+        ei_decode_ulong(buffer, &index, &sound_handle);
 
         soloud.stop(sound_handle);
 
@@ -135,12 +135,12 @@ int main() {
         break;
       }
       case OP_SEEK: {
-        long sound_handle;
+        unsigned long sound_handle;
         int _tuple_arity;
         double seek_pos;
         ei_decode_version(buffer, &index, &_version);
         ei_decode_tuple_header(buffer, &index, &_tuple_arity);
-        ei_decode_long(buffer, &index, &sound_handle);
+        ei_decode_ulong(buffer, &index, &sound_handle);
         ei_decode_double(buffer, &index, &seek_pos);
 
         fprintf(stderr, "Seeking to %lf\n", seek_pos);

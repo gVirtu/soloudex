@@ -1,4 +1,4 @@
 use Mix.Config
 
 config :soloudex,
-  max_audio_sources: 512
+  max_wavstreams: 256

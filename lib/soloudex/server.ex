@@ -2,14 +2,11 @@ defmodule SoLoudEx.Server do
   use GenServer
 
   require Logger
+  require SoLoudEx.Constants
 
-  alias SoLoudEx.AudioSource
-  alias SoLoudEx.AudioSource.{Instance, Wavstream}
-
-  @opcodes %{load_wavstream: 1,
-             audio_play: 10,
-             audio_stop: 11,
-             audio_seek: 12}
+  alias SoLoudEx.{AudioSource, Voice}
+  alias SoLoudEx.AudioSource.Wavstream
+  alias SoLoudEx.Constants
 
   ## Client API
 
@@ -27,14 +24,14 @@ defmodule SoLoudEx.Server do
   end
 
   def audio_play(%Wavstream{} = wavstream) do
-    GenServer.call(__MODULE__, {:audio_play, AudioSource.identify(wavstream)})
+    GenServer.call(__MODULE__, {:audio_play, wavstream})
   end
 
-  def audio_stop(%Instance{handle: handle}) do
+  def audio_stop(%Voice{handle: handle}) do
     GenServer.call(__MODULE__, {:audio_stop, handle})
   end
 
-  def audio_seek(%Instance{handle: handle}, seek_position) when seek_position >= 0
+  def audio_seek(%Voice{handle: handle}, seek_position) when seek_position >= 0
                                                             and seek_position <= 32767 do
     GenServer.call(__MODULE__, {:audio_seek, handle, seek_position})
   end
@@ -66,8 +63,8 @@ defmodule SoLoudEx.Server do
     send_message(state, from, :load_wavstream, {path, slot || length(wavstream_list)})
 
   @impl true
-  def handle_call({:audio_play, {type, sound_id}}, from, state), do:
-    send_message(state, from, :audio_play, {type, sound_id})
+  def handle_call({:audio_play, wavstream}, from, state), do:
+    send_message(state, from, :audio_play, AudioSource.identify(wavstream), source: wavstream)
 
   @impl true
   def handle_call({:audio_stop, sound_handle}, from, state), do:
@@ -78,9 +75,9 @@ defmodule SoLoudEx.Server do
     send_message(state, from, :audio_seek, {sound_handle, seek_position / 1})
 
   @impl true
-  def handle_info({port, {:data, data}}, %{port: port, last_request: {type, from, msg}} = state) do
+  def handle_info({port, {:data, data}}, %{port: port, last_request: {type, from, msg, opts}} = state) do
     return_data = :erlang.binary_to_term(data)
-    {processed_return, updated_state} = handle_return(type, msg, return_data, state)
+    {processed_return, updated_state} = handle_return(type, msg, return_data, state, opts)
     GenServer.reply(from, processed_return)
 
     {:noreply, %{updated_state | last_request: nil}}
@@ -112,26 +109,26 @@ defmodule SoLoudEx.Server do
   end
 
   defp handle_return(:load_wavstream, path_and_slot, {:ok, slot},
-                     %{loaded_wavstreams: files} = state) do
+                     %{loaded_wavstreams: files} = state, _opts) do
     {
       {:ok, AudioSource.create_wavstream(slot)},
       %{state | loaded_wavstreams: [path_and_slot | files]}
     }
   end
 
-  defp handle_return(:audio_play, _params, {:ok, handle}, state) do
+  defp handle_return(:audio_play, _params, {:ok, handle}, state, opts) do
     {
-      {:ok, AudioSource.create_instance(handle)},
+      {:ok, AudioSource.create_voice(opts[:source], handle)},
       state
     }
   end
 
-  defp handle_return(_type, _params, return_data, state), do: {return_data, state}
+  defp handle_return(_type, _params, return_data, state, _opts), do: {return_data, state}
 
-  defp send_message(%{port: port} = state, from, type, message) do
-    Port.command(port, <<@opcodes[type]>> <> :erlang.term_to_binary(message))
+  defp send_message(%{port: port} = state, from, type, message, opts \\ []) do
+    Port.command(port, <<Constants.opcodes()[type]>> <> :erlang.term_to_binary(message))
 
-    {:noreply, %{state | last_request: {type, from, message}}}
+    {:noreply, %{state | last_request: {type, from, message, opts}}}
   end
 
   defp reload_wavstreams(path_list) do

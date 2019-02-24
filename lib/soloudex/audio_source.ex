@@ -3,13 +3,18 @@ defmodule SoLoudEx.AudioSource do
   Utility functions that handle the construction of audio sources.
   """
 
-  @sourcetypes Enum.with_index([:wavstream, :wav])
+  require SoLoudEx.Constants
 
-  alias SoLoudEx.AudioSource.{Instance, Wavstream}
+  alias SoLoudEx.AudioSource.Wavstream
+  alias SoLoudEx.Voice
+  alias SoLoudEx.Constants
 
-  def create_wavstream(id), do: %Wavstream{id: id}
+  def create_wavstream(id), do:
+    %Wavstream{id: rem(id, Application.get_env(:soloudex, :max_wavstreams, 256))}
 
-  def identify(%Wavstream{id: id}), do: {@sourcetypes[:wavstream], id}
+  def identify(%Wavstream{id: id}), do:
+    {Constants.source_types()[:wavstream], id}
 
-  def create_instance(handle), do: %Instance{handle: handle}
+  def create_voice(source, handle), do:
+    %Voice{source: source, handle: handle}
 end

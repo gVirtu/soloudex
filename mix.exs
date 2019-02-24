@@ -9,7 +9,7 @@ defmodule SoLoudEx.MixProject do
       start_permanent: Mix.env() == :prod,
       compilers: [:elixir_make | Mix.compilers],
       make_env: fn ->
-        %{"MAX_AUDIO_SOURCES" => "#{Application.get_env(:soloudex, :max_audio_sources, 512)}"}
+        %{"MAX_WAVSTREAMS" => "#{Application.get_env(:soloudex, :max_wavstreams, 256)}"}
       end,
       deps: deps()
     ]
