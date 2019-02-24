@@ -10,7 +10,12 @@ LIBRARY_PATHS = ${ERLANG_LIBRARY}
 LIBRARY_PATHS += priv/lib
 
 LIBRARIES = ${ERLANG_OBJECTS}
-LIBRARIES += soloud_static pthread asound
+
+ifeq ($(TRAVIS),true)
+	LIBRARIES += soloud_static pthread
+else
+	LIBRARIES += soloud_static pthread asound
+endif
 
 SRC = $(wildcard src/*.cpp)
 OBJ = $(SRC:.cpp=.o)
@@ -19,10 +24,10 @@ CC_PLIB = $(foreach plib, $(LIBRARY_PATHS), -L$(plib))
 CC_PINC = $(foreach pinc, $(INCLUDED_FILES), -I$(pinc))
 CC_LIBS = $(foreach obj, $(LIBRARIES), -l$(obj))
 
-$(info $$CC_LIBS is [${CC_LIBS}])
-$(info $$CC_PLIB is [${CC_PLIB}])
-$(info $$CC_PINC is [${CC_PINC}])
-$(info $$CXX is [${CXX}])
+# $(info $$CC_LIBS is [${CC_LIBS}])
+# $(info $$CC_PLIB is [${CC_PLIB}])
+# $(info $$CC_PINC is [${CC_PINC}])
+# $(info $$CXX is [${CXX}])
 
 DEFAULT_TARGETS ?= cpp_priv priv/cpp/soloud
 

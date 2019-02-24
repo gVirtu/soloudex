@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gVirtu/soloudex.svg?branch=master)](https://travis-ci.org/gVirtu/soloudex)
+
 # SoLoudEx
 
 **TODO: Add description**

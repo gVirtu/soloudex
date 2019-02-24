@@ -5,14 +5,14 @@ defmodule SoLoudEx.AudioSource do
 
   require SoLoudEx.Constants
 
-  alias SoLoudEx.AudioSource.Wavstream
-  alias SoLoudEx.Voice
+  alias SoLoudEx.AudioSource.WavStream
   alias SoLoudEx.Constants
+  alias SoLoudEx.Voice
 
   def create_wavstream(id), do:
-    %Wavstream{id: rem(id, Application.get_env(:soloudex, :max_wavstreams, 256))}
+    %WavStream{id: rem(id, Application.get_env(:soloudex, :max_wavstreams, 256))}
 
-  def identify(%Wavstream{id: id}), do:
+  def identify(%WavStream{id: id}), do:
     {Constants.source_types()[:wavstream], id}
 
   def create_voice(source, handle), do:

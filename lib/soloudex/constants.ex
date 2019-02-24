@@ -1,4 +1,8 @@
 defmodule SoLoudEx.Constants do
+  @moduledoc """
+  Declares some shared constants that are used within SoLoudEx.
+  """
+
   [
     opcodes: %{
       load_wavstream: 1,

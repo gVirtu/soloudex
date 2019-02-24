@@ -1,11 +1,15 @@
 defmodule SoLoudEx.Server do
+  @moduledoc """
+  This module is responsible for communicating with the SoLoud process, issuing commands
+  and receiving responses.
+  """
   use GenServer
 
   require Logger
   require SoLoudEx.Constants
 
   alias SoLoudEx.{AudioSource, Voice}
-  alias SoLoudEx.AudioSource.Wavstream
+  alias SoLoudEx.AudioSource.WavStream
   alias SoLoudEx.Constants
 
   ## Client API
@@ -23,7 +27,7 @@ defmodule SoLoudEx.Server do
     GenServer.call(__MODULE__, {:load_wavstream, filepath, slot})
   end
 
-  def audio_play(%Wavstream{} = wavstream) do
+  def audio_play(%WavStream{} = wavstream) do
     GenServer.call(__MODULE__, {:audio_play, wavstream})
   end
 
@@ -32,7 +36,7 @@ defmodule SoLoudEx.Server do
   end
 
   def audio_seek(%Voice{handle: handle}, seek_position) when seek_position >= 0
-                                                            and seek_position <= 32767 do
+                                                            and seek_position <= 32_767 do
     GenServer.call(__MODULE__, {:audio_seek, handle, seek_position})
   end
 
@@ -50,7 +54,7 @@ defmodule SoLoudEx.Server do
             loaded_wavstreams: []}}
   end
 
-  def setup_port() do
+  def setup_port do
     opts = [:stream, :binary, {:packet, 2}]
     port = Port.open({:spawn, :code.priv_dir(:soloudex) ++ '/cpp/soloud'}, opts)
     ref = Port.monitor(port)

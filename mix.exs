@@ -12,7 +12,7 @@ defmodule SoLoudEx.MixProject do
         %{"MAX_WAVSTREAMS" => "#{Application.get_env(:soloudex, :max_wavstreams, 256)}"}
       end,
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: ["coveralls.html": :test],
+      preferred_cli_env: [coveralls: :test, "coveralls.html": :test],
       deps: deps()
     ]
   end
@@ -27,7 +27,8 @@ defmodule SoLoudEx.MixProject do
   defp deps do
     [
       {:elixir_make, "~> 0.5.0"},
-      {:excoveralls, "~> 0.10.5", only: :test}
+      {:excoveralls, "~> 0.10.5", only: :test},
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
