@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/gVirtu/soloudex.svg?branch=master)](https://travis-ci.org/gVirtu/soloudex)
+[![Coverage Status](https://coveralls.io/repos/github/gVirtu/soloudex/badge.svg?branch=master)](https://coveralls.io/github/gVirtu/soloudex?branch=master)
 
 # SoLoudEx
 
