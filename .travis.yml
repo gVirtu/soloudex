@@ -6,6 +6,7 @@ dist: trusty
 before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
+  - "cp /tmp/cached/mix.lock mix.lock || :"
 
 install:
   # GCC / G++ Setup
@@ -13,22 +14,20 @@ install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 90
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
   # SOLOUD SETUP
-  - mkdir -p priv/lib
-  - wget -O soloud.tar.gz https://api.github.com/repos/jarikomppa/soloud/tarball/RELEASE_20181119
-  - tar -xzf soloud.tar.gz
-  - cd jarikomppa-soloud-64dd662/build
-  - cat genie.lua | sed -e "s/WITH_ALSA = 1/WITH_ALSA = 0/" | sed -e "s/WITH_OSS = 1/WITH_OSS = 0/" > new_genie.lua
-  - mv new_genie.lua genie.lua
-  - wget -O genie https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
-  - chmod +x genie
-  - ./genie gmake
-  - cd gmake
-  - make SoloudStatic
-  - cd ../..
-  - mv lib/libsoloud_static.a ../priv/lib/libsoloud_static.a
+  - chmod +x install_soloud.sh
+  - ./install_soloud.sh
   # SOLOUDEX SETUP
-  - cd ..
   - mix local.rebar --force; mix local.hex --force; mix deps.get
+
+before_script:
+  - cp mix.lock /tmp/cached/mix.lock
 
 script:
   - mix coveralls && mix credo --strict
+
+cache:
+  directories:
+  - _build
+  - deps
+  - priv/lib
+  - /tmp/cached
