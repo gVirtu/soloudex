@@ -27,8 +27,12 @@ defmodule SoLoudEx.Server do
     GenServer.call(__MODULE__, {:load_wavstream, filepath, slot})
   end
 
-  def audio_play(%WavStream{} = wavstream) do
-    GenServer.call(__MODULE__, {:audio_play, wavstream})
+  def audio_play(%WavStream{} = wavstream, opts \\ []) do
+    if Keyword.keyword?(opts) do
+      GenServer.call(__MODULE__, {:audio_play, wavstream, opts})
+    else
+      {:error, Constants.errors.opts_not_keyword}
+    end
   end
 
   def audio_stop(%Voice{handle: handle}) do
@@ -67,8 +71,8 @@ defmodule SoLoudEx.Server do
     send_message(state, from, :load_wavstream, {path, slot || length(wavstream_list)})
 
   @impl true
-  def handle_call({:audio_play, wavstream}, from, state), do:
-    send_message(state, from, :audio_play, AudioSource.identify(wavstream), source: wavstream)
+  def handle_call({:audio_play, wavstream, opts}, from, state), do:
+    send_message(state, from, :audio_play, {AudioSource.identify(wavstream), opts}, source: wavstream)
 
   @impl true
   def handle_call({:audio_stop, sound_handle}, from, state), do:

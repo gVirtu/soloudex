@@ -10,7 +10,10 @@ defmodule SoLoudEx.Constants do
       audio_stop: 11,
       audio_seek: 12
     },
-    source_types: Enum.with_index([:wavstream, :wav])
+    source_types: Enum.with_index([:wavstream, :wav]),
+    errors: %{
+      opts_not_keyword: "Options must be a keyword list."
+    }
   ]
   |> Enum.each(fn {constant, value} ->
     defmacro unquote(constant)(), do: Macro.escape(unquote(Macro.escape(value)))

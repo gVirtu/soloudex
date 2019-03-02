@@ -90,15 +90,43 @@ int main() {
         long sound_index;
         ei_decode_version(buffer, &index, &_version);
         ei_decode_tuple_header(buffer, &index, &_tuple_length);
+
+        // Sound identification
+        ei_decode_tuple_header(buffer, &index, &_tuple_length);
         ei_decode_long(buffer, &index, &sound_type);
         ei_decode_long(buffer, &index, &sound_index);
+
+        // Default Opts
+        int opts_length;
+        double aVolume = -1.0f;
+        double aPan = 0.0f;
+        int aPaused = 0;
+        unsigned long aBus = 0;
+
+        // Opt list parsing
+        ei_decode_list_header(buffer, &index, &opts_length);
+        for(int i=0; i<opts_length; ++i) {
+          char option_string[MAX_BINARY_SIZE];
+          ei_decode_tuple_header(buffer, &index, &_tuple_length);
+          ei_decode_atom(buffer, &index, option_string);
+
+          if (strcmp(option_string, "volume")==0) {
+            ei_decode_double(buffer, &index, &aVolume);
+          } else if (strcmp(option_string, "pan")==0) {
+            ei_decode_double(buffer, &index, &aPan);
+          } else if (strcmp(option_string, "paused?")==0) {
+            ei_decode_boolean(buffer, &index, &aPaused);
+          } else if (strcmp(option_string, "bus")==0) {
+            ei_decode_ulong(buffer, &index, &aBus);
+          }
+        }
 
         unsigned int handle = -1;
 
         switch(sound_type) {
           case TYPE_WAVSTREAM: {
             fprintf(stderr, "Playing wavstream %ld", sound_index);
-            handle = soloud.play(soloud_wavstreams[sound_index]);
+            handle = soloud.play(soloud_wavstreams[sound_index], aVolume, aPan, aPaused, aBus);
             break;
           }
           default: {
